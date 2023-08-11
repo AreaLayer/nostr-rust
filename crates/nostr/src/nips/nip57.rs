@@ -10,6 +10,17 @@ use secp256k1::XOnlyPublicKey;
 use super::nip33::ParameterizedReplaceableEvent;
 use crate::{EventId, UncheckedUrl};
 
+/// Zap Type
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ZapType {
+    /// Public
+    Public,
+    /// Private
+    Private,
+    /// Anonymous
+    Anonymous,
+}
+
 /// Zap Request Data
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ZapRequestData {
@@ -17,6 +28,10 @@ pub struct ZapRequestData {
     pub public_key: XOnlyPublicKey,
     /// List of relays the recipient's wallet should publish its zap receipt to
     pub relays: Vec<UncheckedUrl>,
+    /// Zap Type
+    pub zap_type: ZapType,
+    /// Message
+    pub message: String,
     /// Amount in `millisats` the sender intends to pay
     pub amount: Option<u64>,
     /// Lnurl pay url of the recipient, encoded using bech32 with the prefix lnurl.
@@ -29,14 +44,27 @@ pub struct ZapRequestData {
 
 impl ZapRequestData {
     /// New Zap Request Data
-    pub fn new(public_key: XOnlyPublicKey, relays: Vec<UncheckedUrl>) -> Self {
+    pub fn new(public_key: XOnlyPublicKey, relays: Vec<UncheckedUrl>, zap_type: ZapType) -> Self {
         Self {
             public_key,
             relays,
+            zap_type,
+            message: String::new(),
             amount: None,
             lnurl: None,
             event_id: None,
             event_coordinate: None,
+        }
+    }
+
+    /// Message
+    pub fn message<S>(self, message: S) -> Self
+    where
+        S: Into<String>,
+    {
+        Self {
+            message: message.into(),
+            ..self
         }
     }
 

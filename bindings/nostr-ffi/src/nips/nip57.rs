@@ -5,6 +5,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 use nostr::nips::nip57;
+use nostr::prelude::ZapType;
 
 use crate::helper::unwrap_or_clone_arc;
 use crate::{EventId, PublicKey};
@@ -28,11 +29,12 @@ impl From<nip57::ZapRequestData> for ZapRequestData {
 }
 
 impl ZapRequestData {
-    pub fn new(public_key: Arc<PublicKey>, relays: Vec<String>) -> Self {
+    pub fn new(public_key: Arc<PublicKey>, relays: Vec<String>, zap_type: ZapType) -> Self {
         Self {
             inner: nip57::ZapRequestData::new(
                 public_key.as_ref().into(),
                 relays.into_iter().map(|r| r.into()).collect(),
+                zap_type,
             ),
         }
     }

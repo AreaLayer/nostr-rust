@@ -22,7 +22,7 @@ use crate::nips::nip04;
 #[cfg(feature = "nip46")]
 use crate::nips::nip46::Message as NostrConnectMessage;
 use crate::nips::nip53::LiveEvent;
-use crate::nips::nip57::ZapRequestData;
+use crate::nips::nip57::{ZapRequestData, ZapType};
 use crate::nips::nip58::Error as Nip58Error;
 use crate::nips::nip94::FileMetadata;
 use crate::nips::nip98::HttpData;
@@ -107,6 +107,7 @@ pub struct EventBuilder {
     kind: Kind,
     tags: Vec<Tag>,
     content: String,
+    custom_keys: Option<&'static Keys>,
 }
 
 impl EventBuilder {
@@ -119,11 +120,13 @@ impl EventBuilder {
             kind,
             tags: tags.to_vec(),
             content: content.into(),
+            custom_keys: None,
         }
     }
 
     /// Build [`Event`]
     pub fn to_event(self, keys: &Keys) -> Result<Event, Error> {
+        let keys: &Keys = self.custom_keys.unwrap_or(keys);
         let pubkey: XOnlyPublicKey = keys.public_key();
         Ok(self.to_unsigned_event(pubkey).sign(keys)?)
     }
@@ -144,6 +147,7 @@ impl EventBuilder {
 
     /// Build POW [`Event`]
     pub fn to_pow_event(self, keys: &Keys, difficulty: u8) -> Result<Event, Error> {
+        let keys: &Keys = self.custom_keys.unwrap_or(keys);
         let pubkey: XOnlyPublicKey = keys.public_key();
         Ok(self.to_unsigned_pow_event(pubkey, difficulty).sign(keys)?)
     }
@@ -498,6 +502,8 @@ impl EventBuilder {
         let ZapRequestData {
             public_key,
             relays,
+            zap_type,
+            message,
             amount,
             lnurl,
             event_id,
@@ -525,7 +531,27 @@ impl EventBuilder {
             tags.push(Tag::Lnurl(lnurl));
         }
 
-        Self::new(Kind::ZapRequest, "", &tags)
+        match zap_type {
+            ZapType::Public => Self::new(Kind::ZapRequest, message, &tags),
+            ZapType::Private => {
+                tags.push(Tag::Anon { msg: None });
+                Self {
+                    kind: Kind::ZapRequest,
+                    tags,
+                    content: message,
+                    custom_keys: Some(&Keys::generate())
+                }
+            }
+            ZapType::Anonymous => {
+                tags.push(Tag::Anon { msg: None });
+                Self {
+                    kind: Kind::ZapRequest,
+                    tags,
+                    content: message,
+                    custom_keys: Some(&Keys::generate())
+                }
+            }
+        }
     }
 
     /// Create zap receipt event
