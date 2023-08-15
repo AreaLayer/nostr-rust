@@ -22,7 +22,7 @@ use crate::nips::nip04;
 #[cfg(feature = "nip46")]
 use crate::nips::nip46::Message as NostrConnectMessage;
 use crate::nips::nip53::LiveEvent;
-use crate::nips::nip57::{ZapRequestData, ZapType};
+use crate::nips::nip57::ZapRequestData;
 use crate::nips::nip58::Error as Nip58Error;
 use crate::nips::nip94::FileMetadata;
 use crate::nips::nip98::HttpData;
@@ -104,10 +104,9 @@ impl From<nip58::Error> for Error {
 /// [`Event`] builder
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct EventBuilder {
-    kind: Kind,
-    tags: Vec<Tag>,
-    content: String,
-    custom_keys: Option<&'static Keys>,
+    pub(crate) kind: Kind,
+    pub(crate) tags: Vec<Tag>,
+    pub(crate) content: String,
 }
 
 impl EventBuilder {
@@ -120,13 +119,11 @@ impl EventBuilder {
             kind,
             tags: tags.to_vec(),
             content: content.into(),
-            custom_keys: None,
         }
     }
 
     /// Build [`Event`]
     pub fn to_event(self, keys: &Keys) -> Result<Event, Error> {
-        let keys: &Keys = self.custom_keys.unwrap_or(keys);
         let pubkey: XOnlyPublicKey = keys.public_key();
         Ok(self.to_unsigned_event(pubkey).sign(keys)?)
     }
@@ -147,7 +144,6 @@ impl EventBuilder {
 
     /// Build POW [`Event`]
     pub fn to_pow_event(self, keys: &Keys, difficulty: u8) -> Result<Event, Error> {
-        let keys: &Keys = self.custom_keys.unwrap_or(keys);
         let pubkey: XOnlyPublicKey = keys.public_key();
         Ok(self.to_unsigned_pow_event(pubkey, difficulty).sign(keys)?)
     }
@@ -495,14 +491,13 @@ impl EventBuilder {
         Self::new(Kind::Reporting, content, tags)
     }
 
-    /// Create zap request event
+    /// Create public zap request event
     ///
     /// <https://github.com/nostr-protocol/nips/blob/master/57.md>
     pub fn new_zap_request(data: ZapRequestData) -> Self {
         let ZapRequestData {
             public_key,
             relays,
-            zap_type,
             message,
             amount,
             lnurl,
@@ -531,27 +526,7 @@ impl EventBuilder {
             tags.push(Tag::Lnurl(lnurl));
         }
 
-        match zap_type {
-            ZapType::Public => Self::new(Kind::ZapRequest, message, &tags),
-            ZapType::Private => {
-                tags.push(Tag::Anon { msg: None });
-                Self {
-                    kind: Kind::ZapRequest,
-                    tags,
-                    content: message,
-                    custom_keys: Some(&Keys::generate())
-                }
-            }
-            ZapType::Anonymous => {
-                tags.push(Tag::Anon { msg: None });
-                Self {
-                    kind: Kind::ZapRequest,
-                    tags,
-                    content: message,
-                    custom_keys: Some(&Keys::generate())
-                }
-            }
-        }
+        Self::new(Kind::ZapRequest, message, &tags)
     }
 
     /// Create zap receipt event

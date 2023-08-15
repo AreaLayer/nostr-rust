@@ -8,7 +8,8 @@
 use secp256k1::XOnlyPublicKey;
 
 use super::nip33::ParameterizedReplaceableEvent;
-use crate::{EventId, UncheckedUrl};
+use crate::event::builder::Error as BuilderError;
+use crate::{Event, EventBuilder, EventId, Keys, Tag, UncheckedUrl};
 
 /// Zap Type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -28,8 +29,6 @@ pub struct ZapRequestData {
     pub public_key: XOnlyPublicKey,
     /// List of relays the recipient's wallet should publish its zap receipt to
     pub relays: Vec<UncheckedUrl>,
-    /// Zap Type
-    pub zap_type: ZapType,
     /// Message
     pub message: String,
     /// Amount in `millisats` the sender intends to pay
@@ -44,11 +43,10 @@ pub struct ZapRequestData {
 
 impl ZapRequestData {
     /// New Zap Request Data
-    pub fn new(public_key: XOnlyPublicKey, relays: Vec<UncheckedUrl>, zap_type: ZapType) -> Self {
+    pub fn new(public_key: XOnlyPublicKey, relays: Vec<UncheckedUrl>) -> Self {
         Self {
             public_key,
             relays,
-            zap_type,
             message: String::new(),
             amount: None,
             lnurl: None,
@@ -102,4 +100,12 @@ impl ZapRequestData {
             ..self
         }
     }
+}
+
+/// Create anonymous zap request
+pub fn anonymous_zap_request(data: ZapRequestData) -> Result<Event, BuilderError> {
+    let mut builder = EventBuilder::new_zap_request(data);
+    builder.tags.push(Tag::Anon { msg: None });
+    let keys = Keys::generate();
+    builder.to_event(&keys)
 }
