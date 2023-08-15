@@ -175,6 +175,8 @@ interface RelayMessage {
 interface ZapRequestData {
     constructor(PublicKey public_key, sequence<string> relays);
     [Self=ByArc]
+    ZapRequestData message(string message);
+    [Self=ByArc]
     ZapRequestData amount(u64 amount);
     [Self=ByArc]
     ZapRequestData lnurl(string lnurl);
