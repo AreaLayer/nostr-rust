@@ -19,7 +19,9 @@ use super::nip33::ParameterizedReplaceableEvent;
 use crate::event::builder::Error as BuilderError;
 use crate::event::unsigned::Error as UnsignedError;
 use crate::key::Error as KeyError;
-use crate::{Event, EventBuilder, EventId, Keys, Tag, Timestamp, UncheckedUrl, UnsignedEvent};
+use crate::{
+    Event, EventBuilder, EventId, Keys, Kind, Tag, Timestamp, UncheckedUrl, UnsignedEvent,
+};
 
 #[allow(missing_docs)]
 #[derive(Debug)]
@@ -185,16 +187,30 @@ pub fn anonymous_zap_request(data: ZapRequestData) -> Result<Event, Error> {
 /// Create private zap request
 pub fn private_zap_request(data: ZapRequestData, keys: &Keys) -> Result<Event, Error> {
     let created_at: Timestamp = Timestamp::now();
-    let secret_key = create_encryption_key(keys.secret_key()?, data.public_key, created_at)?;
 
-    let msg = encrypt_private_zap_message(secret_key, data.public_key, &data.message)?;
+    // Create encryption key
+    let secret_key: SecretKey =
+        create_encryption_key(keys.secret_key()?, data.public_key, created_at)?;
+
+    // Compose encrypted message
+    let mut tags: Vec<Tag> = vec![Tag::PubKey(data.public_key, None)];
+    if let Some(event_id) = data.event_id {
+        tags.push(Tag::Event(event_id, None, None));
+    }
+    let json = EventBuilder::new(Kind::Custom(9733), &data.message, &tags)
+        .to_event(keys)?
+        .as_json();
+    let msg = encrypt_private_zap_message(secret_key, data.public_key, json)?;
+
+    // Compose zap request event
     let mut builder = EventBuilder::new_zap_request(data);
     builder.content.clear();
     builder.tags.push(Tag::Anon { msg: Some(msg) });
 
-    let keys = Keys::new(secret_key);
+    // Finalize and sign zap request event
+    let private_zap_keys = Keys::new(secret_key);
     let id = EventId::new(
-        &keys.public_key(),
+        &private_zap_keys.public_key(),
         created_at,
         &builder.kind,
         &builder.tags,
@@ -202,14 +218,14 @@ pub fn private_zap_request(data: ZapRequestData, keys: &Keys) -> Result<Event, E
     );
     let unsigned = UnsignedEvent {
         id,
-        pubkey: keys.public_key(),
+        pubkey: private_zap_keys.public_key(),
         created_at,
         kind: builder.kind,
         tags: builder.tags,
         content: builder.content,
     };
 
-    Ok(unsigned.sign(&keys)?)
+    Ok(unsigned.sign(&private_zap_keys)?)
 }
 
 fn create_encryption_key(
