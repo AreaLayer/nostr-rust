@@ -5,10 +5,10 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 use nostr::nips::nip57;
-use nostr::prelude::ZapType;
 
+use crate::error::Result;
 use crate::helper::unwrap_or_clone_arc;
-use crate::{EventId, PublicKey};
+use crate::{Event, EventId, Keys, PublicKey};
 
 #[derive(Clone)]
 pub struct ZapRequestData {
@@ -29,12 +29,11 @@ impl From<nip57::ZapRequestData> for ZapRequestData {
 }
 
 impl ZapRequestData {
-    pub fn new(public_key: Arc<PublicKey>, relays: Vec<String>, zap_type: ZapType) -> Self {
+    pub fn new(public_key: Arc<PublicKey>, relays: Vec<String>) -> Self {
         Self {
             inner: nip57::ZapRequestData::new(
                 public_key.as_ref().into(),
                 relays.into_iter().map(|r| r.into()).collect(),
-                zap_type,
             ),
         }
     }
@@ -56,4 +55,16 @@ impl ZapRequestData {
         builder.inner = builder.inner.event_id(event_id.as_ref().into());
         Arc::new(builder)
     }
+}
+
+pub fn anonymous_zap_request(data: Arc<ZapRequestData>) -> Result<Arc<Event>> {
+    Ok(Arc::new(
+        nip57::anonymous_zap_request(data.as_ref().deref().clone())?.into(),
+    ))
+}
+
+pub fn private_zap_request(data: Arc<ZapRequestData>, keys: Arc<Keys>) -> Result<Arc<Event>> {
+    Ok(Arc::new(
+        nip57::private_zap_request(data.as_ref().deref().clone(), keys.as_ref().deref())?.into(),
+    ))
 }

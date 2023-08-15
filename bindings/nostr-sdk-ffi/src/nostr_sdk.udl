@@ -21,6 +21,11 @@ namespace nostr_sdk {
     [Throws=NostrError]
     string nip44_decrypt(SecretKey secret_key, PublicKey public_key, string payload);
 
+    [Throws=NostrError]
+    Event anonymous_zap_request(ZapRequestData data);
+    [Throws=NostrError]
+    Event private_zap_request(ZapRequestData data, Keys keys);
+
     // Nostr SDK
     [Throws=NostrSdkError]
     void init_logger(LogLevel level);

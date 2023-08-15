@@ -18,11 +18,12 @@ trait FromResult<T>: Sized {
 mod ffi {
     // External
     pub use nostr_ffi::{
-        generate_shared_key, get_nip05_profile, nip04_decrypt, nip04_encrypt, nip44_decrypt,
-        nip44_encrypt, verify_nip05, ClientMessage, Contact, Event, EventBuilder, EventId,
-        FileMetadata, Filter, ImageDimensions, Keys, Metadata, NIP44Version, NostrConnectURI,
-        NostrError, Profile, PublicKey, RelayInformationDocument, RelayMessage, SecretKey, Tag,
-        TagEnum, TagKind, TagKindKnown, Timestamp, UnsignedEvent, ZapRequestData,
+        anonymous_zap_request, generate_shared_key, get_nip05_profile, nip04_decrypt,
+        nip04_encrypt, nip44_decrypt, nip44_encrypt, private_zap_request, verify_nip05,
+        ClientMessage, Contact, Event, EventBuilder, EventId, FileMetadata, Filter,
+        ImageDimensions, Keys, Metadata, NIP44Version, NostrConnectURI, NostrError, Profile,
+        PublicKey, RelayInformationDocument, RelayMessage, SecretKey, Tag, TagEnum, TagKind,
+        TagKindKnown, Timestamp, UnsignedEvent, ZapRequestData,
     };
     pub use nostr_sdk::{Alphabet, RelayStatus};
 
