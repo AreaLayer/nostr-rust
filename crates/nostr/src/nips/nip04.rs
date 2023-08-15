@@ -18,8 +18,8 @@ use secp256k1::{SecretKey, XOnlyPublicKey};
 
 use crate::util;
 
-type Aes256CbcEnc = Encryptor<Aes256>;
-type Aes256CbcDec = Decryptor<Aes256>;
+pub(crate) type Aes256CbcEnc = Encryptor<Aes256>;
+pub(crate) type Aes256CbcDec = Decryptor<Aes256>;
 
 /// `NIP04` error
 #[derive(Debug, Eq, PartialEq)]

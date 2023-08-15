@@ -22,6 +22,7 @@ use crate::nips::nip04;
 #[cfg(feature = "nip46")]
 use crate::nips::nip46::Message as NostrConnectMessage;
 use crate::nips::nip53::LiveEvent;
+#[cfg(feature = "nip57")]
 use crate::nips::nip57::ZapRequestData;
 use crate::nips::nip58::Error as Nip58Error;
 use crate::nips::nip94::FileMetadata;
@@ -494,6 +495,7 @@ impl EventBuilder {
     /// Create public zap request event
     ///
     /// <https://github.com/nostr-protocol/nips/blob/master/57.md>
+    #[cfg(feature = "nip57")]
     pub fn new_zap_request(data: ZapRequestData) -> Self {
         let ZapRequestData {
             public_key,
@@ -532,6 +534,7 @@ impl EventBuilder {
     /// Create zap receipt event
     ///
     /// <https://github.com/nostr-protocol/nips/blob/master/57.md>
+    #[cfg(feature = "nip57")]
     pub fn new_zap_receipt<S>(bolt11: S, preimage: Option<S>, zap_request: Event) -> Self
     where
         S: Into<String>,
@@ -910,6 +913,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "nip57")]
     fn test_zap_event_builder() {
         let bolt11 = String::from("lnbc10u1p3unwfusp5t9r3yymhpfqculx78u027lxspgxcr2n2987mx2j55nnfs95nxnzqpp5jmrh92pfld78spqs78v9euf2385t83uvpwk9ldrlvf6ch7tpascqhp5zvkrmemgth3tufcvflmzjzfvjt023nazlhljz2n9hattj4f8jq8qxqyjw5qcqpjrzjqtc4fc44feggv7065fqe5m4ytjarg3repr5j9el35xhmtfexc42yczarjuqqfzqqqqqqqqlgqqqqqqgq9q9qxpqysgq079nkq507a5tw7xgttmj4u990j7wfggtrasah5gd4ywfr2pjcn29383tphp4t48gquelz9z78p4cq7ml3nrrphw5w6eckhjwmhezhnqpy6gyf0");
         let preimage = Some(String::from(
@@ -932,6 +936,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "nip57")]
     fn test_zap_event_builder_without_preimage() {
         let bolt11 = String::from("lnbc10u1p3unwfusp5t9r3yymhpfqculx78u027lxspgxcr2n2987mx2j55nnfs95nxnzqpp5jmrh92pfld78spqs78v9euf2385t83uvpwk9ldrlvf6ch7tpascqhp5zvkrmemgth3tufcvflmzjzfvjt023nazlhljz2n9hattj4f8jq8qxqyjw5qcqpjrzjqtc4fc44feggv7065fqe5m4ytjarg3repr5j9el35xhmtfexc42yczarjuqqfzqqqqqqqqlgqqqqqqgq9q9qxpqysgq079nkq507a5tw7xgttmj4u990j7wfggtrasah5gd4ywfr2pjcn29383tphp4t48gquelz9z78p4cq7ml3nrrphw5w6eckhjwmhezhnqpy6gyf0");
         let preimage = None;
