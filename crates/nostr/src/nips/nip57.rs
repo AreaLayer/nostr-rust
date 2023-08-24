@@ -19,6 +19,7 @@ use super::nip33::ParameterizedReplaceableEvent;
 use crate::event::builder::Error as BuilderError;
 use crate::event::unsigned::Error as UnsignedError;
 use crate::key::Error as KeyError;
+use crate::util;
 use crate::{
     Event, EventBuilder, EventId, Keys, Kind, Tag, Timestamp, UncheckedUrl, UnsignedEvent,
 };
@@ -248,7 +249,7 @@ fn encrypt_private_zap_message<T>(
 where
     T: AsRef<[u8]>,
 {
-    let key: [u8; 32] = nip04::generate_shared_key(&secret_key, &public_key)?;
+    let key: [u8; 32] = util::generate_shared_key(&secret_key, &public_key)?;
     let iv: [u8; 16] = secp256k1::rand::random();
 
     let cipher = Aes256CbcEnc::new(&key.into(), &iv.into());
