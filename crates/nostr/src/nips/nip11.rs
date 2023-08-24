@@ -13,7 +13,8 @@ use std::net::SocketAddr;
 #[cfg(not(target_arch = "wasm32"))]
 use reqwest::Proxy;
 use serde::{Deserialize, Serialize};
-use url::Url;
+
+use crate::types::{Uri, uri::Scheme};
 
 /// `NIP11` error
 #[derive(Debug)]
@@ -78,7 +79,7 @@ impl RelayInformationDocument {
 
     /// Get Relay Information Document
     #[cfg(not(target_arch = "wasm32"))]
-    pub async fn get(url: Url, proxy: Option<SocketAddr>) -> Result<Self, Error> {
+    pub async fn get(url: Uri, proxy: Option<SocketAddr>) -> Result<Self, Error> {
         use reqwest::Client;
 
         let mut builder = Client::builder();
@@ -88,7 +89,7 @@ impl RelayInformationDocument {
         }
         let client: Client = builder.build()?;
         let url = Self::with_http_scheme(url)?;
-        let req = client.get(url).header("Accept", "application/nostr+json");
+        let req = client.get(url.to_string()).header("Accept", "application/nostr+json");
         match req.send().await {
             Ok(response) => match response.json().await {
                 Ok(json) => Ok(json),
@@ -101,7 +102,7 @@ impl RelayInformationDocument {
     /// Get Relay Information Document
     #[cfg(not(target_arch = "wasm32"))]
     #[cfg(feature = "blocking")]
-    pub fn get_blocking(url: Url, proxy: Option<SocketAddr>) -> Result<Self, Error> {
+    pub fn get_blocking(url: Uri, proxy: Option<SocketAddr>) -> Result<Self, Error> {
         use reqwest::blocking::Client;
 
         let mut builder = Client::builder();
@@ -111,7 +112,7 @@ impl RelayInformationDocument {
         }
         let client: Client = builder.build()?;
         let url = Self::with_http_scheme(url)?;
-        let req = client.get(url).header("Accept", "application/nostr+json");
+        let req = client.get(url.to_string()).header("Accept", "application/nostr+json");
         match req.send() {
             Ok(response) => match response.json() {
                 Ok(json) => Ok(json),
@@ -123,12 +124,12 @@ impl RelayInformationDocument {
 
     /// Get Relay Information Document
     #[cfg(target_arch = "wasm32")]
-    pub async fn get(url: Url) -> Result<Self, Error> {
+    pub async fn get(url: Uri) -> Result<Self, Error> {
         use reqwest::Client;
 
         let client: Client = Client::new();
         let url = Self::with_http_scheme(url)?;
-        let req = client.get(url).header("Accept", "application/nostr+json");
+        let req = client.get(url.to_string()).header("Accept", "application/nostr+json");
         match req.send().await {
             Ok(response) => match response.json().await {
                 Ok(json) => Ok(json),
@@ -140,11 +141,11 @@ impl RelayInformationDocument {
 
     /// Returns new URL with scheme substituted to HTTP(S) if WS(S) was provided,
     /// other schemes leaves untouched.
-    fn with_http_scheme(url: Url) -> Result<Url, Error> {
+    fn with_http_scheme(url: Uri) -> Result<Uri, Error> {
         let mut url = url;
         match url.scheme() {
-            "wss" => url.set_scheme("https").map_err(|_| Error::InvalidScheme)?,
-            "ws" => url.set_scheme("http").map_err(|_| Error::InvalidScheme)?,
+            Some(&Scheme::WSS) => url.set_scheme(Scheme::HTTPS),
+            Some(&Scheme::WS) => url.set_scheme(Scheme::HTTP),
             _ => {}
         }
         Ok(url)

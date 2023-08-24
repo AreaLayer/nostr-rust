@@ -1040,7 +1040,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tungstenite",
- "url",
 ]
 
 [[package]]
@@ -2135,7 +2134,6 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
- "serde",
 ]
 
 [[package]]

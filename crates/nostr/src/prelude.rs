@@ -7,7 +7,6 @@
 #![allow(ambiguous_glob_reexports)]
 
 // External crates
-pub use ::url::*;
 #[cfg(feature = "nip19")]
 pub use bech32::*;
 #[cfg(feature = "nip06")]

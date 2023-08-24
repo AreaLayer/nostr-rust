@@ -26,7 +26,7 @@ mod scheme;
 pub use self::authority::Authority;
 pub use self::builder::Builder;
 use self::byte_str::ByteStr;
-use self::error::Error;
+pub use self::error::Error;
 pub use self::path::PathAndQuery;
 pub use self::port::Port;
 pub use self::scheme::Scheme;
@@ -344,6 +344,10 @@ impl Uri {
         } else {
             Some(self.scheme.as_str())
         }
+    }
+
+    pub fn set_scheme(&mut self, scheme: Scheme) {
+        self.scheme = scheme;
     }
 
     /// Get the authority of this `Uri`.

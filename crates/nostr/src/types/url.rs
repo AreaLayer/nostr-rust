@@ -7,13 +7,14 @@ use core::fmt;
 use core::str::FromStr;
 
 use serde::{Deserialize, Serialize};
-use url::{ParseError, Url};
+
+use super::uri::{self, Uri};
 
 /// Url Error
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum Error {
     /// Url error
-    Url(ParseError),
+    Url(uri::Error),
 }
 
 impl std::error::Error for Error {}
@@ -26,8 +27,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<ParseError> for Error {
-    fn from(e: ParseError) -> Self {
+impl From<uri::Error> for Error {
+    fn from(e: uri::Error) -> Self {
         Self::Url(e)
     }
 }
@@ -68,11 +69,11 @@ impl FromStr for UncheckedUrl {
     }
 }
 
-impl TryFrom<UncheckedUrl> for Url {
+impl TryFrom<UncheckedUrl> for Uri {
     type Error = Error;
 
-    fn try_from(unchecked_url: UncheckedUrl) -> Result<Url, Self::Error> {
-        Ok(Self::parse(&unchecked_url.0)?)
+    fn try_from(unchecked_url: UncheckedUrl) -> Result<Self, Self::Error> {
+        Self::from_str(&unchecked_url.0).map_err(|e| Error::Url(uri::Error::Uri(e)))
     }
 }
 
@@ -90,15 +91,15 @@ mod tests {
     #[test]
     fn test_unchecked_relay_url() -> Result<()> {
         let relay = "wss://relay.damus.io/";
-        let relay_url = Url::from_str(relay)?;
+        let relay_url = Uri::from_str(relay)?;
 
         println!("{}", relay_url.to_string());
 
-        let unchecked_relay_url = UncheckedUrl::from(relay_url.clone());
+        let unchecked_relay_url = UncheckedUrl::from(relay_url.to_string());
 
         assert_eq!(unchecked_relay_url, UncheckedUrl::from(relay));
 
-        assert_eq!(Url::try_from(unchecked_relay_url.clone())?, relay_url);
+        assert_eq!(Uri::try_from(unchecked_relay_url.clone())?, relay_url);
 
         assert_eq!(relay, unchecked_relay_url.to_string());
 

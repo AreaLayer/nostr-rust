@@ -20,7 +20,6 @@ pub use bitcoin;
 pub use bitcoin_hashes as hashes;
 pub use secp256k1::{self, SECP256K1};
 pub use serde_json;
-pub use url::{self, Url};
 
 pub mod event;
 pub mod key;

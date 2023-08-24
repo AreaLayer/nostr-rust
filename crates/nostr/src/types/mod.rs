@@ -19,3 +19,4 @@ pub use self::metadata::Metadata;
 pub use self::profile::Profile;
 pub use self::time::Timestamp;
 pub use self::url::UncheckedUrl;
+pub use self::uri::Uri;

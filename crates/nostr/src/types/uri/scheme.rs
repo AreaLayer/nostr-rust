@@ -28,6 +28,14 @@ pub(super) enum Protocol {
 }
 
 impl Scheme {
+    pub const WS: Scheme = Scheme {
+        inner: Scheme2::Other(Box::new(ByteStr::from_static("ws"))),
+    };
+
+    pub const WSS: Scheme = Scheme {
+        inner: Scheme2::Other(Box::new(ByteStr::from_static("wss"))),
+    };
+
     /// HTTP protocol scheme
     pub const HTTP: Scheme = Scheme {
         inner: Scheme2::Standard(Protocol::Http),

@@ -10,7 +10,8 @@ use serde::de::{Deserializer, MapAccess, Visitor};
 use serde::ser::{SerializeMap, Serializer};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use url::Url;
+
+use crate::types::Uri;
 
 /// [`Metadata`] error
 #[derive(Debug)]
@@ -137,25 +138,25 @@ impl Metadata {
     }
 
     /// Set website
-    pub fn website(self, url: Url) -> Self {
+    pub fn website(self, url: Uri) -> Self {
         Self {
-            website: Some(url.into()),
+            website: Some(url.to_string()),
             ..self
         }
     }
 
     /// Set picture
-    pub fn picture(self, url: Url) -> Self {
+    pub fn picture(self, url: Uri) -> Self {
         Self {
-            picture: Some(url.into()),
+            picture: Some(url.to_string()),
             ..self
         }
     }
 
     /// Set banner
-    pub fn banner(self, url: Url) -> Self {
+    pub fn banner(self, url: Uri) -> Self {
         Self {
-            banner: Some(url.into()),
+            banner: Some(url.to_string()),
             ..self
         }
     }
