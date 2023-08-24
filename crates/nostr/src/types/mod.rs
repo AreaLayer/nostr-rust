@@ -9,6 +9,7 @@ pub mod entity;
 pub mod metadata;
 pub mod profile;
 pub mod time;
+pub mod uri;
 pub mod url;
 
 pub use self::channel_id::ChannelId;

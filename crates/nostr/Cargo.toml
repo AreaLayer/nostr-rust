@@ -34,6 +34,7 @@ bech32 = { version = "0.9", optional = true }
 bip39 = { version = "2.0", optional = true }
 bitcoin = { version = "0.30", optional = true }
 bitcoin_hashes = { version = "0.12", features = ["serde"] }
+bytes = { version = "1.4", default-features = false, features = ["std"] }
 cbc = { version = "0.1", features = ["alloc"], optional = true }
 chacha20 = { version = "0.9", optional = true }
 nostr-ots = { version = "0.2", optional = true }
