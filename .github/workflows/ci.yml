@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ 
+      master,
+      bitcoin-v0.29
+    ]
   pull_request:
     branches: [ master ]
 
