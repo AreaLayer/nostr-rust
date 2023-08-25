@@ -11,7 +11,6 @@ use core::fmt;
 use std::string::FromUtf8Error;
 
 use bech32::{self, FromBase32, ToBase32, Variant};
-use bitcoin_hashes::Hash;
 use secp256k1::{SecretKey, XOnlyPublicKey};
 use serde::{Deserialize, Serialize};
 
@@ -273,7 +272,7 @@ impl ToBech32 for Nip19Event {
 
     fn to_bech32(&self) -> Result<String, Self::Err> {
         let mut bytes: Vec<u8> = vec![SPECIAL, 32];
-        bytes.extend(self.event_id.inner().as_byte_array());
+        bytes.extend(self.event_id.inner().iter());
 
         for relay in self.relays.iter() {
             bytes.extend([RELAY, relay.len() as u8]);

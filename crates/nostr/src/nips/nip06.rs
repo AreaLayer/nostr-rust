@@ -9,7 +9,7 @@ use core::fmt;
 use core::str::FromStr;
 
 use bip39::Mnemonic;
-use bitcoin::bip32::{DerivationPath, ExtendedPrivKey};
+use bitcoin::util::bip32::{DerivationPath, ExtendedPrivKey};
 use bitcoin::Network;
 use bitcoin_hashes::hmac::{Hmac, HmacEngine};
 use bitcoin_hashes::{sha512, Hash, HashEngine};
@@ -22,7 +22,7 @@ use crate::{Keys, SECP256K1};
 #[derive(Debug, Eq, PartialEq)]
 pub enum Error {
     /// BIP32 error
-    BIP32(bitcoin::bip32::Error),
+    BIP32(bitcoin::util::bip32::Error),
     /// BIP39 error
     BIP39(bip39::Error),
 }
@@ -38,8 +38,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<bitcoin::bip32::Error> for Error {
-    fn from(e: bitcoin::bip32::Error) -> Self {
+impl From<bitcoin::util::bip32::Error> for Error {
+    fn from(e: bitcoin::util::bip32::Error) -> Self {
         Self::BIP32(e)
     }
 }
@@ -90,7 +90,7 @@ impl GenerateMnemonic for Keys {
         let mut os_random = [0u8; 32];
         OsRng.fill_bytes(&mut os_random);
         h.input(&os_random);
-        let entropy: [u8; 64] = Hmac::from_engine(h).to_byte_array();
+        let entropy: [u8; 64] = Hmac::from_engine(h).into_inner();
         let len: usize = word_count * 4 / 3;
         Ok(Mnemonic::from_entropy(&entropy[0..len])?)
     }

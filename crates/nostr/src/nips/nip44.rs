@@ -107,7 +107,7 @@ where
             OsRng.fill_bytes(&mut nonce);
 
             // Compose cipher
-            let mut cipher = XChaCha20::new(key.as_byte_array().into(), &nonce.into());
+            let mut cipher = XChaCha20::new(key.to_vec().as_slice().into(), &nonce.into());
 
             // Encrypt
             let mut buffer: Vec<u8> = content.as_ref().to_vec();
@@ -156,7 +156,7 @@ where
             let key: Sha256Hash = Sha256Hash::hash(&shared_key);
 
             // Compose cipher
-            let mut cipher = XChaCha20::new(key.as_byte_array().into(), nonce.into());
+            let mut cipher = XChaCha20::new(key.to_vec().as_slice().into(), nonce.into());
 
             // Decrypt
             let mut buffer: Vec<u8> = ciphertext.to_vec();

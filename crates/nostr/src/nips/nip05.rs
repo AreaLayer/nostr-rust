@@ -10,6 +10,7 @@ use core::str::FromStr;
 #[cfg(not(target_arch = "wasm32"))]
 use std::net::SocketAddr;
 
+use bitcoin_hashes::hex::ToHex;
 #[cfg(not(target_arch = "wasm32"))]
 use reqwest::Proxy;
 use secp256k1::XOnlyPublicKey;
@@ -93,7 +94,7 @@ where
 fn get_relays_from_json(json: Value, pk: XOnlyPublicKey) -> Vec<String> {
     let relays_list: Option<Vec<String>> = json
         .get("relays")
-        .and_then(|relays| relays.get(pk.to_string()))
+        .and_then(|relays| relays.get(pk.to_hex()))
         .and_then(|value| serde_json::from_value(value.clone()).ok());
 
     match relays_list {

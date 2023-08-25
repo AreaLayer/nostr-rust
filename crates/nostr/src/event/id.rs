@@ -6,6 +6,7 @@
 use core::fmt;
 use core::str::FromStr;
 
+use bitcoin_hashes::hex::FromHex;
 use bitcoin_hashes::sha256::Hash as Sha256Hash;
 use bitcoin_hashes::Hash;
 use secp256k1::XOnlyPublicKey;
@@ -74,7 +75,7 @@ impl EventId {
     where
         S: Into<String>,
     {
-        Ok(Self(Sha256Hash::from_str(&hex.into())?))
+        Ok(Self(Sha256Hash::from_hex(&hex.into())?))
     }
 
     /// [`EventId`] from bytes
